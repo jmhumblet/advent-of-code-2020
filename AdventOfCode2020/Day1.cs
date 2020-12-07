@@ -14,9 +14,16 @@ namespace AdventOfCode2020
             result.Should().Be(4036);
         }
 
-        private int Find(IEnumerable<int> numbers)
+        [Fact]
+        public void Test2()
         {
-            return 0;
+            var result = Find(new[] { 2017, 3 });
+            result.Should().Be(6051);
+        }
+
+        private int Find(int[] numbers)
+        {
+            return numbers[0] * numbers[1];
         }
     }
 }
