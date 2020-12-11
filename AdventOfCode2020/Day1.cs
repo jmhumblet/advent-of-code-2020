@@ -28,20 +28,38 @@ namespace AdventOfCode2020
         }
     }
 
+    public class FinderTests
+    {
+        [Fact]
+        public void NotFound()
+        {
+            Finder.Find(new int[] { 0, 0 }).Should().BeNull();
+        }
+
+        [Fact]
+        public void FoundInFirstPlace()
+        {
+            Finder.Find(new int[] { 1010, 1010 }).Should().Be((1010, 1010));
+        }
+    }
+
+    public static class Finder
+    {
+        public static (int one, int two)? Find(int[] input)
+        {
+            return input[0] + input[1] == 2020 ? (input[0], input[1]) : null;
+        }
+    }
+
     public class Day1Resolver
     {
         public int? Resolve(int[] numbers)
         {
-            var f = FindNumbers(numbers);
+            var f = Finder.Find(numbers);
 
-            return (f.HasValue)
+            return f.HasValue
                 ? Multiply(f.Value.one, f.Value.two)
                 : null;
-        }
-
-        private (int one, int two)? FindNumbers(int[] numbers)
-        {
-            return numbers[0] + numbers[1] == 2020 ? (numbers[0], numbers[1]) : null;
         }
 
         private static int Multiply(int one, int two)
