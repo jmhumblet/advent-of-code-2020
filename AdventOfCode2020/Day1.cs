@@ -32,11 +32,21 @@ namespace AdventOfCode2020
     {
         public int? Find(int[] numbers)
         {
-            return numbers[0] + numbers[1] == 2020
-                ? numbers[0] * numbers[1]
+            var f = FindNumbers(numbers);
+
+            return (f.HasValue)
+                ? Multiply(f.Value.one, f.Value.two)
                 : null;
         }
+
+        private (int one, int two)? FindNumbers(int[] numbers)
+        {
+            return numbers[0] + numbers[1] == 2020 ? (numbers[0], numbers[1]) : null;
+        }
+
+        private static int Multiply(int one, int two)
+        {
+            return one * two;
+        }
     }
-
-
 }
