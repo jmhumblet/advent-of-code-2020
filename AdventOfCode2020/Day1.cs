@@ -37,30 +37,35 @@ namespace AdventOfCode2020
         }
     }
 
-    public class FinderTests
+    public class FinderOfTwoTests
     {
         [Fact]
         public void NotFound()
         {
-            Finder.Find(new int[] { 0, 0 }).Should().BeNull();
+            new FinderOfTwo().Finds(new int[] { 0, 0 }).Should().BeNull();
         }
 
         [Fact]
         public void FoundInFirstPlace()
         {
-            Finder.Find(new int[] { 1010, 1010 }).Should().Be((1010, 1010));
+            new FinderOfTwo().Finds(new int[] { 1010, 1010 }).Should().BeEquivalentTo(new[] { 1010, 1010 });
         }
 
         [Fact]
         public void FoundInLastPlace()
         {
-            Finder.Find(new int[] { 0, 1010, 1010 }).Should().Be((1010, 1010));
+            new FinderOfTwo().Finds(new int[] { 0, 1010, 1010 }).Should().BeEquivalentTo(new[] { 1010, 1010 });
         }
     }
 
-    public static class Finder
+    public interface IFinder
     {
-        public static (int one, int two)? Find(int[] input)
+        public int[] Finds(int[] input);
+    }
+
+    public class FinderOfTwo : IFinder
+    {
+        public int[] Finds(int[] input)
         {
             var hashset = new HashSet<int>();
 
@@ -69,29 +74,45 @@ namespace AdventOfCode2020
                 var complement = 2020 - input[i];
                 if (hashset.Contains(complement))
                 {
-                    return (complement, input[i]);
+                    return new[] { complement, input[i] };
                 }
                 hashset.Add(input[i]);
             }
 
             return null;
         }
+
+        public (int one, int two)? Find(int[] input)
+        {
+            var result = Finds(input);
+
+            return result != null
+                ? (result[0], result[1])
+                : null;
+        }
     }
 
     public class Day1Resolver
     {
+        private IFinder finder;
+
+        public Day1Resolver(IFinder finder = null)
+        {
+            this.finder = finder ?? new FinderOfTwo();
+        }
+
         public int? Resolve(int[] numbers)
         {
-            var f = Finder.Find(numbers);
+            var f = this.finder.Finds(numbers);
 
-            return f.HasValue
-                ? Multiply(f.Value.one, f.Value.two)
+            return f != null
+                ? Multiply(f)
                 : null;
         }
 
-        private static int Multiply(int one, int two)
+        private static int Multiply(int[] numbers)
         {
-            return one * two;
+            return numbers.Aggregate(1, (aggregate, next) => aggregate * next);
         }
     }
 }
