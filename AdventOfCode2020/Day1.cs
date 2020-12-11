@@ -1,6 +1,8 @@
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace AdventOfCode2020
@@ -25,6 +27,13 @@ namespace AdventOfCode2020
         {
             var result = new Day1Resolver().Resolve(new[] { 2017, 3 });
             result.Should().Be(6051);
+        }
+
+        [Fact]
+        public void Resolve()
+        {
+            var result = new Day1Resolver().Resolve(File.ReadAllLines("./input/input1.txt").Select(l => Convert.ToInt32(l)).ToArray());
+            result.Should().Be(1016131);
         }
     }
 
