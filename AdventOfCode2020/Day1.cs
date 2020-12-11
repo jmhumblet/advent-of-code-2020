@@ -10,21 +10,21 @@ namespace AdventOfCode2020
         [Fact]
         public void Test1()
         {
-            var result = Finder.Find(new[] { 2018, 2 });
+            var result = new Finder().Find(new[] { 2018, 2 });
             result.Should().Be(4036);
         }
 
         [Fact]
         public void Test2()
         {
-            var result = Finder.Find(new[] { 2017, 3 });
+            var result = new Finder().Find(new[] { 2017, 3 });
             result.Should().Be(6051);
         }
     }
 
     public class Finder
     {
-        public static int Find(int[] numbers)
+        public int Find(int[] numbers)
         {
             return numbers[0] * numbers[1];
         }
