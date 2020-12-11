@@ -12,28 +12,36 @@ namespace AdventOfCode2020
         [Fact]
         public void NotFound()
         {
-            new Day1Resolver().Resolve(new[] { 0, 0 }).Should().BeNull();
+            new Day1Resolver(new FinderOfTwo()).Resolve(new[] { 0, 0 }).Should().BeNull();
         }
 
         [Fact]
         public void Test1()
         {
-            var result = new Day1Resolver().Resolve(new[] { 2018, 2 });
+            var result = new Day1Resolver(new FinderOfTwo()).Resolve(new[] { 2018, 2 });
             result.Should().Be(4036);
         }
 
         [Fact]
         public void Test2()
         {
-            var result = new Day1Resolver().Resolve(new[] { 2017, 3 });
+            var result = new Day1Resolver(new FinderOfTwo()).Resolve(new[] { 2017, 3 });
             result.Should().Be(6051);
         }
 
         [Fact]
         public void Resolve()
         {
-            var result = new Day1Resolver().Resolve(File.ReadAllLines("./input/input1.txt").Select(l => Convert.ToInt32(l)).ToArray());
+            var result = new Day1Resolver(new FinderOfTwo()).Resolve(File.ReadAllLines("./input/input1.txt").Select(l => Convert.ToInt32(l)).ToArray());
             result.Should().Be(1016131);
+        }
+
+
+        [Fact]
+        public void ResolvePartTwo()
+        {
+            var result = new Day1Resolver(new FinderOfThree()).Resolve(File.ReadAllLines("./input/input1.txt").Select(l => Convert.ToInt32(l)).ToArray());
+            result.Should().Be(276432018);
         }
     }
 
@@ -42,30 +50,51 @@ namespace AdventOfCode2020
         [Fact]
         public void NotFound()
         {
-            new FinderOfTwo().Finds(new int[] { 0, 0 }).Should().BeNull();
+            new FinderOfTwo().Find(new int[] { 0, 0 }).Should().BeNull();
         }
 
         [Fact]
         public void FoundInFirstPlace()
         {
-            new FinderOfTwo().Finds(new int[] { 1010, 1010 }).Should().BeEquivalentTo(new[] { 1010, 1010 });
+            new FinderOfTwo().Find(new int[] { 1010, 1010 }).Should().BeEquivalentTo(new[] { 1010, 1010 });
         }
 
         [Fact]
         public void FoundInLastPlace()
         {
-            new FinderOfTwo().Finds(new int[] { 0, 1010, 1010 }).Should().BeEquivalentTo(new[] { 1010, 1010 });
+            new FinderOfTwo().Find(new int[] { 0, 1010, 1010 }).Should().BeEquivalentTo(new[] { 1010, 1010 });
+        }
+    }
+
+    public class FinderOfThreeTests
+    {
+        [Fact]
+        public void NotFound()
+        {
+            new FinderOfThree().Find(new int[] { 0, 0, 0 }).Should().BeNull();
+        }
+
+        [Fact]
+        public void FoundInFirstPlace()
+        {
+            new FinderOfThree().Find(new int[] { 0, 2020, 0 }).Should().BeEquivalentTo(new[] { 0, 2020, 0 });
+        }
+
+        [Fact]
+        public void FoundInLastPlace()
+        {
+            new FinderOfThree().Find(new int[] { 1, 0, 0, 2020 }).Should().BeEquivalentTo(new[] { 0,0,2020 });
         }
     }
 
     public interface IFinder
     {
-        public int[] Finds(int[] input);
+        public int[] Find(int[] input);
     }
 
     public class FinderOfTwo : IFinder
     {
-        public int[] Finds(int[] input)
+        public int[] Find(int[] input)
         {
             var hashset = new HashSet<int>();
 
@@ -81,29 +110,20 @@ namespace AdventOfCode2020
 
             return null;
         }
-
-        public (int one, int two)? Find(int[] input)
-        {
-            var result = Finds(input);
-
-            return result != null
-                ? (result[0], result[1])
-                : null;
-        }
     }
 
     public class Day1Resolver
     {
         private IFinder finder;
 
-        public Day1Resolver(IFinder finder = null)
+        public Day1Resolver(IFinder finder)
         {
-            this.finder = finder ?? new FinderOfTwo();
+            this.finder = finder;
         }
 
         public int? Resolve(int[] numbers)
         {
-            var f = this.finder.Finds(numbers);
+            var f = this.finder.Find(numbers);
 
             return f != null
                 ? Multiply(f)
