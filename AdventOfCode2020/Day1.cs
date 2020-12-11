@@ -10,27 +10,27 @@ namespace AdventOfCode2020
         [Fact]
         public void NotFound()
         {
-            new Finder().Find(new[] { 0, 0 }).Should().BeNull();
+            new Day1Resolver().Resolve(new[] { 0, 0 }).Should().BeNull();
         }
 
         [Fact]
         public void Test1()
         {
-            var result = new Finder().Find(new[] { 2018, 2 });
+            var result = new Day1Resolver().Resolve(new[] { 2018, 2 });
             result.Should().Be(4036);
         }
 
         [Fact]
         public void Test2()
         {
-            var result = new Finder().Find(new[] { 2017, 3 });
+            var result = new Day1Resolver().Resolve(new[] { 2017, 3 });
             result.Should().Be(6051);
         }
     }
 
-    public class Finder
+    public class Day1Resolver
     {
-        public int? Find(int[] numbers)
+        public int? Resolve(int[] numbers)
         {
             var f = FindNumbers(numbers);
 
