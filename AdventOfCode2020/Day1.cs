@@ -41,13 +41,31 @@ namespace AdventOfCode2020
         {
             Finder.Find(new int[] { 1010, 1010 }).Should().Be((1010, 1010));
         }
+
+        [Fact]
+        public void FoundInLastPlace()
+        {
+            Finder.Find(new int[] { 0, 1010, 1010 }).Should().Be((1010, 1010));
+        }
     }
 
     public static class Finder
     {
         public static (int one, int two)? Find(int[] input)
         {
-            return input[0] + input[1] == 2020 ? (input[0], input[1]) : null;
+            var hashset = new HashSet<int>();
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                var complement = 2020 - input[i];
+                if (hashset.Contains(complement))
+                {
+                    return (complement, input[i]);
+                }
+                hashset.Add(input[i]);
+            }
+
+            return null;
         }
     }
 
