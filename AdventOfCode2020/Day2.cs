@@ -16,7 +16,7 @@ namespace AdventOfCode2020
         [Fact]
         public void ParseLine()
         {
-            var line = Line.Parse(lineExample);
+            var line = Line<NumberOfOccurencesPolicy>.Parse(lineExample, NumberOfOccurencesPolicy.Parse);
             line.Should().NotBeNull();
             line.Policy.MinimumOccurrence.Should().Be(8);
             line.Policy.MaximumOccurence.Should().Be(11);
@@ -30,9 +30,9 @@ namespace AdventOfCode2020
         [InlineData("0-1 a: b", true)]
         [InlineData("0-0 a: a", false)]
         [InlineData("0-1 a: aa", false)]
-        public void IsValid(string lineText, bool isValid)
+        public void IsNumberOfOccurencesValid(string lineText, bool isValid)
         {
-            var line = Line.Parse(lineText);
+            var line = Line<NumberOfOccurencesPolicy>.Parse(lineText, NumberOfOccurencesPolicy.Parse);
             line.IsValid.Should().Be(isValid);
         }
 
@@ -40,35 +40,56 @@ namespace AdventOfCode2020
         public void Resolve()
         {
             File.ReadAllLines("./input/input2.txt")
-                .Select(l => Line.Parse(l))
+                .Select(l => Line<NumberOfOccurencesPolicy>.Parse(l, NumberOfOccurencesPolicy.Parse))
+                .Count(l => l.IsValid)
+                .Should()
+                .Be(416);
+        }
+
+        [Theory]
+        [InlineData("1-1 a: a", false)]
+        [InlineData("1-2 a: aa", false)]
+        [InlineData("1-2 a: ab", true)]
+        [InlineData("1-3 a: aab", true)]
+        public void IsPlacesOfOccurencesValid(string lineText, bool isValid)
+        {
+            var line = Line<PlacesOfOccurencesPolicy>.Parse(lineText, PlacesOfOccurencesPolicy.Parse);
+            line.IsValid.Should().Be(isValid);
+        }
+
+        [Fact]
+        public void ResolvePart2()
+        {
+            File.ReadAllLines("./input/input2.txt")
+                .Select(l => Line<PlacesOfOccurencesPolicy>.Parse(l, PlacesOfOccurencesPolicy.Parse))
                 .Count(l => l.IsValid)
                 .Should()
                 .Be(416);
         }
     }
 
-    internal record Line
+    internal record Line<TPolicy> where TPolicy : Policy
     {
-        private Line(Policy policy, string password)
+        private Line(TPolicy policy, string password)
         {
             Policy = policy;
             Password = password;
         }
 
-        public static Line? Parse(string text)
+        public static Line<TPolicy>? Parse(string text, Func<string, TPolicy?> policyParser)
         {
             var parts = text.Split(':', StringSplitOptions.TrimEntries);
-            var policy = Policy.Parse(parts[0]);
+            var policy = policyParser.Invoke(parts[0]);
 
             if (policy == null)
             {
                 return null;
             }
 
-            return new Line(policy, parts[1]);
+            return new Line<TPolicy>(policy, parts[1]);
         }
 
-        public Policy Policy { get; }
+        public TPolicy Policy { get; }
         public string Password { get; }
         public bool IsValid
         {
@@ -80,9 +101,14 @@ namespace AdventOfCode2020
 
     }
 
-    internal record Policy
+    internal abstract record Policy
     {
-        private Policy(int minimumOccurence, int maximumOccurrence, char letter)
+        public abstract bool IsRespectedBy(string password);
+    }
+
+    internal record NumberOfOccurencesPolicy : Policy
+    {
+        private NumberOfOccurencesPolicy(int minimumOccurence, int maximumOccurrence, char letter)
         {
             MinimumOccurrence = minimumOccurence;
             MaximumOccurence = maximumOccurrence;
@@ -93,7 +119,7 @@ namespace AdventOfCode2020
         public int MaximumOccurence { get; }
         public char Letter { get; }
 
-        internal static Policy? Parse(string policyText)
+        public static NumberOfOccurencesPolicy? Parse(string policyText)
         {
             var parts = policyText.Split(new[] { '-', ' ' });
 
@@ -101,14 +127,45 @@ namespace AdventOfCode2020
             var maximumOccurrence = Convert.ToInt32(parts[1]);
             var letter = parts[2][0];
 
-            return new Policy(minimumOccurrence, maximumOccurrence, letter); 
+            return new NumberOfOccurencesPolicy(minimumOccurrence, maximumOccurrence, letter); 
         }
 
-        internal bool IsRespectedBy(string password)
+        public override bool IsRespectedBy(string password)
         {
             var letterCount = password.Count(letter => letter == Letter);
 
             return letterCount >= MinimumOccurrence && letterCount <= MaximumOccurence;
+        }
+    }
+
+    internal record PlacesOfOccurencesPolicy : Policy
+    {
+        public PlacesOfOccurencesPolicy(int firstOccurrencePosition, int secondOccurencePosition, char letter)
+        {
+            FirstOccurrencePosition = firstOccurrencePosition;
+            SecondOccurencePosition = secondOccurencePosition;
+            Letter = letter;
+        }
+
+        public int FirstOccurrencePosition { get; }
+        public int SecondOccurencePosition { get; }
+        public char Letter { get; }
+
+        public static PlacesOfOccurencesPolicy? Parse(string policyText)
+        {
+            var parts = policyText.Split(new[] { '-', ' ' });
+
+            var firstOccurrencePosition = Convert.ToInt32(parts[0]);
+            var secondOccurencePosition = Convert.ToInt32(parts[1]);
+            var letter = parts[2][0];
+
+            return new PlacesOfOccurencesPolicy(firstOccurrencePosition, secondOccurencePosition, letter);
+        }
+
+        public override bool IsRespectedBy(string password)
+        {
+            return password[FirstOccurrencePosition - 1] == Letter
+                ^ password[SecondOccurencePosition - 1] == Letter;
         }
     }
 
